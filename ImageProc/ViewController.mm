@@ -93,15 +93,17 @@ time = [[NSString stringWithFormat:@"%u mcs", (uint32_t)endTicks] retain]; \
 
 	__block UIImage *coregraphImage = nil;
 	__block NSString *coregraphTime = nil;
-
-	MEASURE_CALL_TIME(coregraphTime, ^{
+	
+	dispatch_block_t processBlock = ^{
 		const CGSize size = self.coregraphImage.bounds.size;
 		UIGraphicsBeginImageContext(size);
 		[origImage drawInRect:((CGRect) {CGPointZero, size})];
-		coregraphImage = UIGraphicsGetImageFromCurrentImageContext();
+		coregraphImage = [UIImage imageWithCGImage:UIGraphicsGetImageFromCurrentImageContext().CGImage];
 		UIGraphicsEndImageContext();
-	});
+	};
 
+	MEASURE_CALL_TIME(coregraphTime, processBlock);
+	
 	dispatch_async(dispatch_get_main_queue(), ^{
 		self.coregraphImage.image = coregraphImage;
 		self.coregraphImage.hidden = NO;
@@ -121,18 +123,21 @@ time = [[NSString stringWithFormat:@"%u mcs", (uint32_t)endTicks] retain]; \
 	__block UIImage *accelerateImage = nil;
 	__block NSString *accelerateTime = nil;
 
-	MEASURE_CALL_TIME(accelerateTime, ^{
+	dispatch_block_t processBlock = ^{
+		// SP - general info
 		const NSUInteger bytesPerPixel = 4;
 		const NSUInteger bitsPerComponent = 8;
 		const CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
 		const CGBitmapInfo bitmapInfo = kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Big;
 
+		// SP - source info
 		const CGImageRef sourceRef = origImage.CGImage;
 		const NSUInteger sourceWidth = CGImageGetWidth(sourceRef);
 		const NSUInteger sourceHeight = CGImageGetHeight(sourceRef);
 		const NSUInteger sourceBytesPerRow = sourceWidth * bytesPerPixel;
-
 		unsigned char *sourceData = (unsigned char *) calloc(sourceWidth * sourceHeight * bytesPerPixel, sizeof(unsigned char));
+		
+		// SP - source context
 		CGContextRef sourceContext = CGBitmapContextCreate(
 				sourceData,
 				sourceWidth,
@@ -143,15 +148,29 @@ time = [[NSString stringWithFormat:@"%u mcs", (uint32_t)endTicks] retain]; \
 				bitmapInfo
 		);
 
+		// SP - draw source
 		CGContextDrawImage(sourceContext, CGRectMake(0, 0, sourceWidth, sourceHeight), sourceRef);
 		CGContextRelease(sourceContext);
 
+		// SP - destination info
 		const CGSize destSize = self.accelerateImage.bounds.size;
 		const NSUInteger destWidth = (NSUInteger) destSize.width;
 		const NSUInteger destHeight = (NSUInteger) destSize.height;
 		const NSUInteger destBytesPerRow = destWidth * bytesPerPixel;
 		unsigned char *destData = (unsigned char *) calloc(destWidth * destHeight * bytesPerPixel, sizeof(unsigned char));
 
+		// SP - destination context
+		CGContextRef destContext = CGBitmapContextCreate(
+				destData,
+				destWidth,
+				destHeight,
+				bitsPerComponent,
+				destBytesPerRow,
+				colorSpace,
+				bitmapInfo
+		);
+		
+		// SP - draw into destination using Accelerate framework
 		vImage_Buffer sourceBuffer;
 		sourceBuffer.data = sourceData;
 		sourceBuffer.width = sourceWidth;
@@ -163,24 +182,16 @@ time = [[NSString stringWithFormat:@"%u mcs", (uint32_t)endTicks] retain]; \
 		destBuffer.width = destWidth;
 		destBuffer.height = destHeight;
 		destBuffer.rowBytes = destBytesPerRow;
-		
-		vImage_Error err = vImageScale_ARGB8888(&sourceBuffer, &destBuffer, NULL, 0);
+
+		vImage_Error err = vImageScale_ARGB8888(&sourceBuffer, &destBuffer, NULL, kvImageLeaveAlphaUnchanged);
 		free(sourceData);
 
-		CGContextRef destContext = CGBitmapContextCreate(
-				destData,
-				destWidth,
-				destHeight,
-				bitsPerComponent,
-				destBytesPerRow,
-				colorSpace,
-				bitmapInfo
-		);
-
+		// SP - get result image
 		CGImageRef destRef = CGBitmapContextCreateImage(destContext);
 		accelerateImage = [UIImage imageWithCGImage:destRef];
 		CGImageRelease(destRef);
 
+		// SP - cleanup
 		CGColorSpaceRelease(colorSpace);
 		CGContextRelease(destContext);
 
@@ -189,8 +200,10 @@ time = [[NSString stringWithFormat:@"%u mcs", (uint32_t)endTicks] retain]; \
 		if (err != kvImageNoError) {
 			assert(0);
 		}
-	});
-
+	};
+	
+	MEASURE_CALL_TIME(accelerateTime, processBlock);
+	
 	dispatch_async(dispatch_get_main_queue(), ^{
 		self.accelerateImage.image = accelerateImage;
 		self.accelerateImage.hidden = NO;
