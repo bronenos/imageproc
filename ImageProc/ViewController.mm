@@ -28,7 +28,8 @@ time = [[NSString stringWithFormat:@"%u mcs", (uint32_t)endTicks] retain]; \
 
 typedef NS_ENUM(NSUInteger, kImageAction) {
 	kImageActionScale,
-	kImageActionRotate
+	kImageActionRotate,
+	kImageActionFlip
 };
 
 
@@ -56,7 +57,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 @implementation ViewController
 {
 	kImageAction _action;
-	vImage_Buffer *_sourceBuffer, *_destBuffer;
+	vImage_Buffer _sourceBuffer, _destBuffer;
 }
 
 #pragma mark - Memory
@@ -109,11 +110,17 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	[self generateImages];
 }
 
+- (IBAction)doFlip
+{
+	_action = kImageActionFlip;
+	[self generateImages];
+}
+
 
 #pragma mark - Private Methods
 - (NSString *)currentAction
 {
-	NSArray *actions = @[ @"scale", @"rotate" ];
+	NSArray *actions = @[ @"scale", @"rotate", @"flip" ];
 	return actions[_action];
 }
 
@@ -242,21 +249,16 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	);
 
 	// SP - draw into destination using Accelerate framework
-	vImage_Buffer sourceBuffer;
-	sourceBuffer.data = sourceData;
-	sourceBuffer.width = sourceWidth;
-	sourceBuffer.height = sourceHeight;
-	sourceBuffer.rowBytes = sourceBytesPerRow;
+	_sourceBuffer.data = sourceData;
+	_sourceBuffer.width = sourceWidth;
+	_sourceBuffer.height = sourceHeight;
+	_sourceBuffer.rowBytes = sourceBytesPerRow;
 
-	vImage_Buffer destBuffer;
-	destBuffer.data = destData;
-	destBuffer.width = destWidth;
-	destBuffer.height = destHeight;
-	destBuffer.rowBytes = destBytesPerRow;
+	_destBuffer.data = destData;
+	_destBuffer.width = destWidth;
+	_destBuffer.height = destHeight;
+	_destBuffer.rowBytes = destBytesPerRow;
 	
-	_sourceBuffer = &sourceBuffer;
-	_destBuffer = &destBuffer;
-
 	NSString *action = [[self currentAction] stringByAppendingString:@"Accelerate"];
 	[self performSelector:NSSelectorFromString(action)];
 	
@@ -287,7 +289,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (void)scaleAccelerate
 {
-	vImage_Error err = vImageScale_ARGB8888(_sourceBuffer, _destBuffer, NULL, kvImageLeaveAlphaUnchanged);
+	vImage_Error err = vImageScale_ARGB8888(&_sourceBuffer, &_destBuffer, NULL, kvImageLeaveAlphaUnchanged);
 	assert(err == kvImageNoError);
 }
 
@@ -298,7 +300,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	const CGSize size = self.coregraphImageView.bounds.size;
 	CGContextRef context = UIGraphicsGetCurrentContext();
 
-	CGContextRotateCTM(context, (float)(90.f * M_PI / 180.f));
+	CGContextRotateCTM(context, (float)(M_PI * .5f));
 	CGContextTranslateCTM(context, 0, -size.height);
 	[self.originalImageView.image drawInRect:((CGRect) {CGPointZero, size})];
 }
@@ -306,7 +308,26 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (void)rotateAccelerate
 {
 	Pixel_8888 backgroundColor = {0, 0, 0, 0};
-	vImage_Error err = vImageRotate90_ARGB8888(_sourceBuffer, _destBuffer, kRotate90DegreesClockwise, backgroundColor, kvImageNoFlags);
+	vImage_Error err = vImageRotate90_ARGB8888(&_sourceBuffer, &_destBuffer, kRotate90DegreesClockwise, backgroundColor, kvImageNoFlags);
+//	vImage_Error err = vImageRotate_ARGB8888(&_sourceBuffer, &_destBuffer, NULL, (float) (M_PI * 1.5f), backgroundColor, kvImageNoFlags);
+	assert(err == kvImageNoError);
+}
+
+
+#pragma mark - Flip
+- (void)flipCoregraph
+{
+	const CGSize size = self.coregraphImageView.bounds.size;
+	CGContextRef context = UIGraphicsGetCurrentContext();
+
+	CGContextScaleCTM(context, 1.f, -1.f);
+	CGContextTranslateCTM(context, 0, -size.height);
+	[self.originalImageView.image drawInRect:((CGRect) {CGPointZero, size})];
+}
+
+- (void)flipAccelerate
+{
+	vImage_Error err = vImageVerticalReflect_ARGB8888(&_sourceBuffer, &_destBuffer, kvImageNoFlags);
 	assert(err == kvImageNoError);
 }
 

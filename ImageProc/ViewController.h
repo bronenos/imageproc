@@ -18,4 +18,5 @@
 
 - (IBAction)doScale;
 - (IBAction)doRotate;
+- (IBAction)doFlip;
 @end
