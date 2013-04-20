@@ -12,8 +12,10 @@
 		</object>
 		<array key="IBDocument.IntegratedClassDependencies">
 			<string>IBProxyObject</string>
+			<string>IBUIBarButtonItem</string>
 			<string>IBUIImageView</string>
 			<string>IBUILabel</string>
+			<string>IBUIToolbar</string>
 			<string>IBUIView</string>
 		</array>
 		<array key="IBDocument.PluginDependencies">
@@ -83,7 +85,7 @@
 					<object class="IBUIImageView" id="493523448">
 						<reference key="NSNextResponder" ref="774585933"/>
 						<int key="NSvFlags">274</int>
-						<string key="NSFrame">{{20, 361}, {120, 120}}</string>
+						<string key="NSFrame">{{20, 323}, {120, 120}}</string>
 						<reference key="NSSuperview" ref="774585933"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="675213025"/>
@@ -94,7 +96,7 @@
 					<object class="IBUILabel" id="621531459">
 						<reference key="NSNextResponder" ref="774585933"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{25, 332}, {110, 21}}</string>
+						<string key="NSFrame">{{25, 294}, {110, 21}}</string>
 						<reference key="NSSuperview" ref="774585933"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="864416830"/>
@@ -123,7 +125,7 @@
 					<object class="IBUILabel" id="740142131">
 						<reference key="NSNextResponder" ref="774585933"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{20, 489}, {120, 21}}</string>
+						<string key="NSFrame">{{20, 451}, {120, 21}}</string>
 						<reference key="NSSuperview" ref="774585933"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="839810292"/>
@@ -148,7 +150,7 @@
 					<object class="IBUIImageView" id="675213025">
 						<reference key="NSNextResponder" ref="774585933"/>
 						<int key="NSvFlags">274</int>
-						<string key="NSFrame">{{180, 361}, {120, 120}}</string>
+						<string key="NSFrame">{{180, 323}, {120, 120}}</string>
 						<reference key="NSSuperview" ref="774585933"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="740142131"/>
@@ -159,7 +161,7 @@
 					<object class="IBUILabel" id="864416830">
 						<reference key="NSNextResponder" ref="774585933"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{200, 332}, {81, 21}}</string>
+						<string key="NSFrame">{{200, 294}, {81, 21}}</string>
 						<reference key="NSSuperview" ref="774585933"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="493523448"/>
@@ -181,10 +183,10 @@
 					<object class="IBUILabel" id="839810292">
 						<reference key="NSNextResponder" ref="774585933"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{180, 489}, {120, 21}}</string>
+						<string key="NSFrame">{{180, 451}, {120, 21}}</string>
 						<reference key="NSSuperview" ref="774585933"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
+						<reference key="NSNextKeyView" ref="101344277"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -199,6 +201,31 @@
 						<reference key="IBUIFontDescription" ref="270996892"/>
 						<reference key="IBUIFont" ref="648378121"/>
 						<bool key="IBUIAdjustsFontSizeToFit">NO</bool>
+					</object>
+					<object class="IBUIToolbar" id="101344277">
+						<reference key="NSNextResponder" ref="774585933"/>
+						<int key="NSvFlags">266</int>
+						<string key="NSFrame">{{0, 504}, {320, 44}}</string>
+						<reference key="NSSuperview" ref="774585933"/>
+						<reference key="NSWindow"/>
+						<string key="NSReuseIdentifierKey">_NS:9</string>
+						<bool key="IBUIOpaque">NO</bool>
+						<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
+						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+						<array class="NSMutableArray" key="IBUIItems">
+							<object class="IBUIBarButtonItem" id="724370249">
+								<string key="IBUITitle">Scale</string>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<int key="IBUIStyle">1</int>
+								<reference key="IBUIToolbar" ref="101344277"/>
+							</object>
+							<object class="IBUIBarButtonItem" id="6247288">
+								<string key="IBUITitle">Rotate</string>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<int key="IBUIStyle">1</int>
+								<reference key="IBUIToolbar" ref="101344277"/>
+							</object>
+						</array>
 					</object>
 				</array>
 				<string key="NSFrame">{{0, 20}, {320, 548}}</string>
@@ -246,7 +273,7 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">originalImage</string>
+						<string key="label">originalImageView</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="40818831"/>
 					</object>
@@ -254,7 +281,7 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">accelerateImage</string>
+						<string key="label">accelerateImageView</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="675213025"/>
 					</object>
@@ -270,7 +297,7 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">coregraphImage</string>
+						<string key="label">coregraphImageView</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="493523448"/>
 					</object>
@@ -283,6 +310,22 @@
 						<reference key="destination" ref="740142131"/>
 					</object>
 					<int key="connectionID">126</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">doScale</string>
+						<reference key="source" ref="724370249"/>
+						<reference key="destination" ref="372490531"/>
+					</object>
+					<int key="connectionID">134</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">doRotate</string>
+						<reference key="source" ref="6247288"/>
+						<reference key="destination" ref="372490531"/>
+					</object>
+					<int key="connectionID">135</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -308,14 +351,15 @@
 						<int key="objectID">6</int>
 						<reference key="object" ref="774585933"/>
 						<array class="NSMutableArray" key="children">
-							<reference ref="864416830"/>
 							<reference ref="214414881"/>
-							<reference ref="740142131"/>
 							<reference ref="40818831"/>
 							<reference ref="493523448"/>
-							<reference ref="675213025"/>
-							<reference ref="839810292"/>
 							<reference ref="621531459"/>
+							<reference ref="740142131"/>
+							<reference ref="675213025"/>
+							<reference ref="864416830"/>
+							<reference ref="839810292"/>
+							<reference ref="101344277"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -367,6 +411,25 @@
 						<reference key="parent" ref="774585933"/>
 						<string key="objectName">Label - Accelerate 00:00</string>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">130</int>
+						<reference key="object" ref="101344277"/>
+						<array class="NSMutableArray" key="children">
+							<reference ref="724370249"/>
+							<reference ref="6247288"/>
+						</array>
+						<reference key="parent" ref="774585933"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">132</int>
+						<reference key="object" ref="724370249"/>
+						<reference key="parent" ref="101344277"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">133</int>
+						<reference key="object" ref="6247288"/>
+						<reference key="parent" ref="101344277"/>
+					</object>
 				</array>
 			</object>
 			<dictionary class="NSMutableDictionary" key="flattenedProperties">
@@ -374,6 +437,9 @@
 				<string key="-1.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="-2.CustomClassName">UIResponder</string>
 				<string key="-2.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+				<string key="130.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+				<string key="132.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+				<string key="133.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="27.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="32.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="33.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -388,39 +454,53 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">126</int>
+			<int key="maxID">135</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<object class="IBPartialClassDescription">
 					<string key="className">ViewController</string>
 					<string key="superclassName">UIViewController</string>
+					<dictionary class="NSMutableDictionary" key="actions">
+						<string key="doRotate">id</string>
+						<string key="doScale">id</string>
+					</dictionary>
+					<dictionary class="NSMutableDictionary" key="actionInfosByName">
+						<object class="IBActionInfo" key="doRotate">
+							<string key="name">doRotate</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="doScale">
+							<string key="name">doScale</string>
+							<string key="candidateClassName">id</string>
+						</object>
+					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
-						<string key="accelerateImage">UIImageView</string>
+						<string key="accelerateImageView">UIImageView</string>
 						<string key="accelerateTime">UILabel</string>
-						<string key="coregraphImage">UIImageView</string>
+						<string key="coregraphImageView">UIImageView</string>
 						<string key="coregraphTime">UILabel</string>
-						<string key="originalImage">UIImageView</string>
+						<string key="originalImageView">UIImageView</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
-						<object class="IBToOneOutletInfo" key="accelerateImage">
-							<string key="name">accelerateImage</string>
+						<object class="IBToOneOutletInfo" key="accelerateImageView">
+							<string key="name">accelerateImageView</string>
 							<string key="candidateClassName">UIImageView</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="accelerateTime">
 							<string key="name">accelerateTime</string>
 							<string key="candidateClassName">UILabel</string>
 						</object>
-						<object class="IBToOneOutletInfo" key="coregraphImage">
-							<string key="name">coregraphImage</string>
+						<object class="IBToOneOutletInfo" key="coregraphImageView">
+							<string key="name">coregraphImageView</string>
 							<string key="candidateClassName">UIImageView</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="coregraphTime">
 							<string key="name">coregraphTime</string>
 							<string key="candidateClassName">UILabel</string>
 						</object>
-						<object class="IBToOneOutletInfo" key="originalImage">
-							<string key="name">originalImage</string>
+						<object class="IBToOneOutletInfo" key="originalImageView">
+							<string key="name">originalImageView</string>
 							<string key="candidateClassName">UIImageView</string>
 						</object>
 					</dictionary>

@@ -10,9 +10,12 @@
 
 
 @interface ViewController : UIViewController
-@property(nonatomic, retain) IBOutlet UIImageView *originalImage;
-@property(nonatomic, retain) IBOutlet UIImageView *coregraphImage;
+@property(nonatomic, retain) IBOutlet UIImageView *originalImageView;
+@property(nonatomic, retain) IBOutlet UIImageView *coregraphImageView;
 @property(nonatomic, retain) IBOutlet UILabel *coregraphTime;
-@property(nonatomic, retain) IBOutlet UIImageView *accelerateImage;
+@property(nonatomic, retain) IBOutlet UIImageView *accelerateImageView;
 @property(nonatomic, retain) IBOutlet UILabel *accelerateTime;
+
+- (IBAction)doScale;
+- (IBAction)doRotate;
 @end
