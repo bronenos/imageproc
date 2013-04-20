@@ -38,20 +38,25 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (NSString *)currentAction;
 - (void)generateImages;
+
 - (void)generateCoregraphImage;
+- (UIImage *)prepareAndGenerateCoregraphImage;
+
 - (void)generateAccelerateImage;
+- (UIImage *)prepareAndGenerateAccelerateImage;
 
-- (UIImage *)scaleCoregraph;
-- (UIImage *)scaleAccelerate;
+- (void)scaleCoregraph;
+- (void)scaleAccelerate;
 
-- (UIImage *)rotateCoregraph;
-- (UIImage *)rotateAccelerate;
+- (void)rotateCoregraph;
+- (void)rotateAccelerate;
 @end
 
 
 @implementation ViewController
 {
 	kImageAction _action;
+	vImage_Buffer *_sourceBuffer, *_destBuffer;
 }
 
 #pragma mark - Memory
@@ -136,8 +141,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 	NSString *coregraphTime = nil;
 	MEASURE_CALL_TIME(coregraphTime, ^{
-		NSString *action = [[self currentAction] stringByAppendingString:@"Coregraph"];
-		self.coregraphImage = [self performSelector:NSSelectorFromString(action)];
+		self.coregraphImage = [self prepareAndGenerateCoregraphImage];
 	});
 	
 	dispatch_async(dispatch_get_main_queue(), ^{
@@ -151,6 +155,21 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	});
 }
 
+- (UIImage *)prepareAndGenerateCoregraphImage
+{
+	const CGSize size = self.coregraphImageView.bounds.size;
+	UIGraphicsBeginImageContext(size);
+
+	NSString *action = [[self currentAction] stringByAppendingString:@"Coregraph"];
+	[self performSelector:NSSelectorFromString(action)];
+	
+	UIImage *ret = [UIImage imageWithCGImage:UIGraphicsGetImageFromCurrentImageContext().CGImage];
+	UIGraphicsEndImageContext();
+
+	return ret;
+}
+
+
 - (void)generateAccelerateImage
 {
 	UIImage *origImage = self.originalImageView.image;
@@ -160,8 +179,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 	NSString *accelerateTime = nil;
 	MEASURE_CALL_TIME(accelerateTime, ^{
-		NSString *action = [[self currentAction] stringByAppendingString:@"Accelerate"];
-		self.accelerateImage = [self performSelector:NSSelectorFromString(action)];
+		self.accelerateImage = [self prepareAndGenerateAccelerateImage];
 	});
 	
 	dispatch_async(dispatch_get_main_queue(), ^{
@@ -175,23 +193,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	});
 }
 
-
-#pragma mark - Scaling
-- (UIImage *)scaleCoregraph
-{
-	const CGSize size = self.coregraphImageView.bounds.size;
-	UIGraphicsBeginImageContext(size);
-//	CGContextRef context = UIGraphicsGetCurrentContext();
-
-	[self.originalImageView.image drawInRect:((CGRect) {CGPointZero, size})];
-	
-	UIImage *ret = [UIImage imageWithCGImage:UIGraphicsGetImageFromCurrentImageContext().CGImage];
-	UIGraphicsEndImageContext();
-	
-	return ret;
-}
-
-- (UIImage *)scaleAccelerate
+- (UIImage *)prepareAndGenerateAccelerateImage
 {
 	// SP - general info
 	const NSUInteger bytesPerPixel = 4;
@@ -251,8 +253,13 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	destBuffer.width = destWidth;
 	destBuffer.height = destHeight;
 	destBuffer.rowBytes = destBytesPerRow;
+	
+	_sourceBuffer = &sourceBuffer;
+	_destBuffer = &destBuffer;
 
-	vImage_Error err = vImageScale_ARGB8888(&sourceBuffer, &destBuffer, NULL, kvImageLeaveAlphaUnchanged);
+	NSString *action = [[self currentAction] stringByAppendingString:@"Accelerate"];
+	[self performSelector:NSSelectorFromString(action)];
+	
 	free(sourceData);
 
 	// SP - get result image
@@ -266,112 +273,41 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 	free(destData);
 
-	if (err != kvImageNoError) {
-		assert(0);
-	}
-	
 	return ret;
 }
 
 
-#pragma mark - Rotation
-- (UIImage *)rotateCoregraph
+
+#pragma mark - Scaling
+- (void)scaleCoregraph
 {
 	const CGSize size = self.coregraphImageView.bounds.size;
-	UIGraphicsBeginImageContext(size);
+	[self.originalImageView.image drawInRect:((CGRect) {CGPointZero, size})];
+}
+
+- (void)scaleAccelerate
+{
+	vImage_Error err = vImageScale_ARGB8888(_sourceBuffer, _destBuffer, NULL, kvImageLeaveAlphaUnchanged);
+	assert(err == kvImageNoError);
+}
+
+
+#pragma mark - Rotation
+- (void)rotateCoregraph
+{
+	const CGSize size = self.coregraphImageView.bounds.size;
 	CGContextRef context = UIGraphicsGetCurrentContext();
 
 	CGContextRotateCTM(context, (float)(90.f * M_PI / 180.f));
 	CGContextTranslateCTM(context, 0, -size.height);
 	[self.originalImageView.image drawInRect:((CGRect) {CGPointZero, size})];
-
-	UIImage *ret = [UIImage imageWithCGImage:UIGraphicsGetImageFromCurrentImageContext().CGImage];
-	UIGraphicsEndImageContext();
-
-	return ret;
 }
 
-- (UIImage *)rotateAccelerate
+- (void)rotateAccelerate
 {
-	// SP - general info
-	const NSUInteger bytesPerPixel = 4;
-	const NSUInteger bitsPerComponent = 8;
-	const CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-	const CGBitmapInfo bitmapInfo = kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Big;
-
-	// SP - source info
-	const CGImageRef sourceRef = self.originalImageView.image.CGImage;
-	const NSUInteger sourceWidth = CGImageGetWidth(sourceRef);
-	const NSUInteger sourceHeight = CGImageGetHeight(sourceRef);
-	const NSUInteger sourceBytesPerRow = sourceWidth * bytesPerPixel;
-	unsigned char *sourceData = (unsigned char *) calloc(sourceWidth * sourceHeight * bytesPerPixel, sizeof(unsigned char));
-
-	// SP - source context
-	CGContextRef sourceContext = CGBitmapContextCreate(
-			sourceData,
-			sourceWidth,
-			sourceHeight,
-			bitsPerComponent,
-			sourceBytesPerRow,
-			colorSpace,
-			bitmapInfo
-	);
-
-	// SP - draw source
-	CGContextDrawImage(sourceContext, CGRectMake(0, 0, sourceWidth, sourceHeight), sourceRef);
-	CGContextRelease(sourceContext);
-
-	// SP - destination info
-	const CGSize destSize = self.accelerateImageView.bounds.size;
-	const NSUInteger destWidth = (NSUInteger) destSize.width;
-	const NSUInteger destHeight = (NSUInteger) destSize.height;
-	const NSUInteger destBytesPerRow = destWidth * bytesPerPixel;
-	unsigned char *destData = (unsigned char *) calloc(destWidth * destHeight * bytesPerPixel, sizeof(unsigned char));
-
-	// SP - destination context
-	CGContextRef destContext = CGBitmapContextCreate(
-			destData,
-			destWidth,
-			destHeight,
-			bitsPerComponent,
-			destBytesPerRow,
-			colorSpace,
-			bitmapInfo
-	);
-
-	// SP - draw into destination using Accelerate framework
-	vImage_Buffer sourceBuffer;
-	sourceBuffer.data = sourceData;
-	sourceBuffer.width = sourceWidth;
-	sourceBuffer.height = sourceHeight;
-	sourceBuffer.rowBytes = sourceBytesPerRow;
-
-	vImage_Buffer destBuffer;
-	destBuffer.data = destData;
-	destBuffer.width = destWidth;
-	destBuffer.height = destHeight;
-	destBuffer.rowBytes = destBytesPerRow;
-
-	Pixel_8888 backgroundColor = { 0, 0, 0, 0 };
-	vImage_Error err = vImageRotate90_ARGB8888(&sourceBuffer, &destBuffer, kRotate90DegreesClockwise, backgroundColor, kvImageNoFlags);
-	free(sourceData);
-
-	// SP - get result image
-	CGImageRef destRef = CGBitmapContextCreateImage(destContext);
-	UIImage *ret = [UIImage imageWithCGImage:destRef];
-	CGImageRelease(destRef);
-
-	// SP - cleanup
-	CGColorSpaceRelease(colorSpace);
-	CGContextRelease(destContext);
-
-	free(destData);
-
-	if (err != kvImageNoError) {
-		assert(0);
-	}
-
-	return ret;
+	Pixel_8888 backgroundColor = {0, 0, 0, 0};
+	vImage_Error err = vImageRotate90_ARGB8888(_sourceBuffer, _destBuffer, kRotate90DegreesClockwise, backgroundColor, kvImageNoFlags);
+	assert(err == kvImageNoError);
 }
 
 @end
