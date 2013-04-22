@@ -12,7 +12,7 @@
 #import "ViewController.h"
 
 
-#define MEASURE_CALL_TIME( time, call ) \
+#define MEASURE_CALL_TIME_ADD( time, call ) \
 {\
 struct timeval tv;\
 int64_t beginTicks;\
@@ -23,13 +23,13 @@ beginTicks = 1000000LL * static_cast<int64_t>(tv.tv_sec) + static_cast<int64_t>(
 gettimeofday(&tv, NULL); \
 endTicks = 1000000LL * static_cast<int64_t>(tv.tv_sec) + static_cast<int64_t>(tv.tv_usec); \
 endTicks -= beginTicks; \
-time = [[NSString stringWithFormat:@"%u mcs", (uint32_t)endTicks] retain]; \
+time += endTicks; \
 }
 
 typedef NS_ENUM(NSUInteger, kImageAction) {
 	kImageActionScale,
 	kImageActionRotate,
-	kImageActionFlip
+	kImageActionFlip,
 };
 
 
@@ -38,6 +38,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 @property(nonatomic, retain) UIImage *accelerateImage;
 
 - (NSString *)currentAction;
+- (void)updateCounter:(int)counter;
 - (void)generateImages;
 
 - (void)generateCoregraphImage;
@@ -45,19 +46,13 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (void)generateAccelerateImage;
 - (UIImage *)prepareAndGenerateAccelerateImage;
-
-- (void)scaleCoregraph;
-- (void)scaleAccelerate;
-
-- (void)rotateCoregraph;
-- (void)rotateAccelerate;
 @end
 
 
 @implementation ViewController
 {
 	kImageAction _action;
-	vImage_Buffer _sourceBuffer, _destBuffer;
+	vImage_Buffer _sourceBuffer, _destBuffer, _tmpBuffer;
 }
 
 #pragma mark - Memory
@@ -124,6 +119,13 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	return actions[_action];
 }
 
+- (void)updateCounter:(int)counter
+{
+	dispatch_async(dispatch_get_main_queue(), ^{
+		self.counterBarItem.title = [NSString stringWithFormat:@"%d", counter];
+	});
+}
+
 - (void)generateImages
 {
 	self.coregraphImageView.hidden = YES;
@@ -134,8 +136,44 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	
 	dispatch_queue_t back_queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
 	dispatch_async(back_queue, ^(void){
-		[self generateCoregraphImage];
-		[self generateAccelerateImage];
+		__block int counter = 0;
+		
+		uint32_t ctime = 0;
+		MEASURE_CALL_TIME_ADD(ctime, ^{
+			for (int i = 0; i < 1000; i++, counter++) {
+				[self generateCoregraphImage];
+				[self updateCounter:counter];
+			}
+		});
+		
+		uint32_t atime = 0;
+		MEASURE_CALL_TIME_ADD(atime, ^{
+			for (int i = 0; i < 1000; i++, counter++) {
+				[self generateAccelerateImage];
+				[self updateCounter:counter];
+			}
+		});
+
+		[self updateCounter:counter];
+		
+		dispatch_async(dispatch_get_main_queue(), ^{
+			self.coregraphImageView.image = self.coregraphImage;
+			self.coregraphImageView.hidden = NO;
+
+			if (self.coregraphImage) {
+				self.coregraphTime.text = [NSString stringWithFormat:@"%u ms", ctime];
+				self.coregraphTime.hidden = NO;
+			}
+
+			
+			self.accelerateImageView.image = self.accelerateImage;
+			self.accelerateImageView.hidden = NO;
+
+			if (self.accelerateImage) {
+				self.accelerateTime.text = [NSString stringWithFormat:@"%u ms", atime];
+				self.accelerateTime.hidden = NO;
+			}
+		});
 	});
 }
 
@@ -146,20 +184,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 		return;
 	}
 
-	NSString *coregraphTime = nil;
-	MEASURE_CALL_TIME(coregraphTime, ^{
-		self.coregraphImage = [self prepareAndGenerateCoregraphImage];
-	});
-	
-	dispatch_async(dispatch_get_main_queue(), ^{
-		self.coregraphImageView.image = self.coregraphImage;
-		self.coregraphImageView.hidden = NO;
-
-		if (self.coregraphImage) {
-			self.coregraphTime.text = coregraphTime;
-			self.coregraphTime.hidden = NO;
-		}
-	});
+	self.coregraphImage = [self prepareAndGenerateCoregraphImage];
 }
 
 - (UIImage *)prepareAndGenerateCoregraphImage
@@ -184,20 +209,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 		return;
 	}
 
-	NSString *accelerateTime = nil;
-	MEASURE_CALL_TIME(accelerateTime, ^{
-		self.accelerateImage = [self prepareAndGenerateAccelerateImage];
-	});
-	
-	dispatch_async(dispatch_get_main_queue(), ^{
-		self.accelerateImageView.image = self.accelerateImage;
-		self.accelerateImageView.hidden = NO;
-
-		if (self.accelerateImage) {
-			self.accelerateTime.text = accelerateTime;
-			self.accelerateTime.hidden = NO;
-		}
-	});
+	self.accelerateImage = [self prepareAndGenerateAccelerateImage];
 }
 
 - (UIImage *)prepareAndGenerateAccelerateImage
@@ -213,7 +225,9 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	const NSUInteger sourceWidth = CGImageGetWidth(sourceRef);
 	const NSUInteger sourceHeight = CGImageGetHeight(sourceRef);
 	const NSUInteger sourceBytesPerRow = sourceWidth * bytesPerPixel;
-	unsigned char *sourceData = (unsigned char *) calloc(sourceWidth * sourceHeight * bytesPerPixel, sizeof(unsigned char));
+	
+	size_t sourceCount = sourceWidth * sourceHeight * bytesPerPixel;
+	unsigned char *sourceData = (unsigned char *) calloc(sourceCount, sizeof(unsigned char));
 
 	// SP - source context
 	CGContextRef sourceContext = CGBitmapContextCreate(
@@ -235,7 +249,10 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	const NSUInteger destWidth = (NSUInteger) destSize.width;
 	const NSUInteger destHeight = (NSUInteger) destSize.height;
 	const NSUInteger destBytesPerRow = destWidth * bytesPerPixel;
-	unsigned char *destData = (unsigned char *) calloc(destWidth * destHeight * bytesPerPixel, sizeof(unsigned char));
+	
+	size_t destCount = destWidth * destHeight * bytesPerPixel;
+	unsigned char *destData = (unsigned char *) calloc(destCount, sizeof(unsigned char));
+	unsigned char *tmpData = (unsigned char *) calloc(destCount, sizeof(unsigned char));
 
 	// SP - destination context
 	CGContextRef destContext = CGBitmapContextCreate(
@@ -258,6 +275,11 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	_destBuffer.width = destWidth;
 	_destBuffer.height = destHeight;
 	_destBuffer.rowBytes = destBytesPerRow;
+	
+	_tmpBuffer.data = tmpData;
+	_tmpBuffer.width = _destBuffer.width;
+	_tmpBuffer.height = _destBuffer.height;
+	_tmpBuffer.rowBytes = _destBuffer.rowBytes;
 	
 	NSString *action = [[self currentAction] stringByAppendingString:@"Accelerate"];
 	[self performSelector:NSSelectorFromString(action)];
@@ -289,8 +311,9 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (void)scaleAccelerate
 {
-	vImage_Error err = vImageScale_ARGB8888(&_sourceBuffer, &_destBuffer, NULL, kvImageLeaveAlphaUnchanged);
-	assert(err == kvImageNoError);
+//	vImageUnpremultiplyData_ARGB8888(&_sourceBuffer, &_sourceBuffer, kvImageNoFlags);
+	vImageScale_ARGB8888(&_sourceBuffer, &_destBuffer, NULL, kvImageLeaveAlphaUnchanged);
+//	vImagePremultiplyData_ARGB8888(&_destBuffer, &_destBuffer, kvImageNoFlags);
 }
 
 
@@ -307,10 +330,11 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (void)rotateAccelerate
 {
+	vImageScale_ARGB8888(&_sourceBuffer, &_tmpBuffer, NULL, kvImageLeaveAlphaUnchanged);
+	
 	Pixel_8888 backgroundColor = {0, 0, 0, 0};
-	vImage_Error err = vImageRotate90_ARGB8888(&_sourceBuffer, &_destBuffer, kRotate90DegreesClockwise, backgroundColor, kvImageNoFlags);
-//	vImage_Error err = vImageRotate_ARGB8888(&_sourceBuffer, &_destBuffer, NULL, (float) (M_PI * 1.5f), backgroundColor, kvImageNoFlags);
-	assert(err == kvImageNoError);
+	vImageRotate90_ARGB8888(&_tmpBuffer, &_destBuffer, kRotate90DegreesClockwise, backgroundColor, kvImageNoFlags);
+//	vImageRotate_ARGB8888(&_destBuffer, &_destBuffer, NULL, (float) (M_PI * 1.5f), backgroundColor, kvImageNoFlags);
 }
 
 
@@ -327,8 +351,8 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (void)flipAccelerate
 {
-	vImage_Error err = vImageVerticalReflect_ARGB8888(&_sourceBuffer, &_destBuffer, kvImageNoFlags);
-	assert(err == kvImageNoError);
+	vImageScale_ARGB8888(&_sourceBuffer, &_tmpBuffer, NULL, kvImageLeaveAlphaUnchanged);
+	vImageVerticalReflect_ARGB8888(&_tmpBuffer, &_destBuffer, kvImageNoFlags);
 }
 
 @end

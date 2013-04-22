@@ -15,6 +15,7 @@
 @property(nonatomic, retain) IBOutlet UILabel *coregraphTime;
 @property(nonatomic, retain) IBOutlet UIImageView *accelerateImageView;
 @property(nonatomic, retain) IBOutlet UILabel *accelerateTime;
+@property(nonatomic, retain) IBOutlet UIBarButtonItem *counterBarItem;
 
 - (IBAction)doScale;
 - (IBAction)doRotate;

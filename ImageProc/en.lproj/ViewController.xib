@@ -226,10 +226,21 @@
 								<int key="IBUIStyle">1</int>
 								<reference key="IBUIToolbar" ref="101344277"/>
 							</object>
-							<object class="IBUIBarButtonItem" id="392234584">
+							<object class="IBUIBarButtonItem" id="471091271">
 								<string key="IBUITitle">Flip</string>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<int key="IBUIStyle">1</int>
+								<reference key="IBUIToolbar" ref="101344277"/>
+							</object>
+							<object class="IBUIBarButtonItem" id="878020581">
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<reference key="IBUIToolbar" ref="101344277"/>
+								<int key="IBUISystemItemIdentifier">5</int>
+							</object>
+							<object class="IBUIBarButtonItem" id="278800418">
+								<bool key="IBUIEnabled">NO</bool>
+								<string key="IBUITitle">0</string>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<reference key="IBUIToolbar" ref="101344277"/>
 							</object>
 						</array>
@@ -319,6 +330,14 @@
 					<int key="connectionID">126</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">counterBarItem</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="278800418"/>
+					</object>
+					<int key="connectionID">141</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">doScale</string>
 						<reference key="source" ref="724370249"/>
@@ -337,7 +356,7 @@
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">doFlip</string>
-						<reference key="source" ref="392234584"/>
+						<reference key="source" ref="471091271"/>
 						<reference key="destination" ref="372490531"/>
 					</object>
 					<int key="connectionID">137</int>
@@ -432,7 +451,9 @@
 						<array class="NSMutableArray" key="children">
 							<reference ref="724370249"/>
 							<reference ref="6247288"/>
-							<reference ref="392234584"/>
+							<reference ref="471091271"/>
+							<reference ref="278800418"/>
+							<reference ref="878020581"/>
 						</array>
 						<reference key="parent" ref="774585933"/>
 					</object>
@@ -448,7 +469,18 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">136</int>
-						<reference key="object" ref="392234584"/>
+						<reference key="object" ref="471091271"/>
+						<reference key="parent" ref="101344277"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">140</int>
+						<reference key="object" ref="278800418"/>
+						<reference key="parent" ref="101344277"/>
+						<string key="objectName">Bar Button Item - Counter</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">142</int>
+						<reference key="object" ref="878020581"/>
 						<reference key="parent" ref="101344277"/>
 					</object>
 				</array>
@@ -462,6 +494,8 @@
 				<string key="132.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="133.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="136.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+				<string key="140.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+				<string key="142.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="27.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="32.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="33.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -476,7 +510,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">137</int>
+			<int key="maxID">142</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -484,11 +518,16 @@
 					<string key="className">ViewController</string>
 					<string key="superclassName">UIViewController</string>
 					<dictionary class="NSMutableDictionary" key="actions">
+						<string key="doCorners">id</string>
 						<string key="doFlip">id</string>
 						<string key="doRotate">id</string>
 						<string key="doScale">id</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
+						<object class="IBActionInfo" key="doCorners">
+							<string key="name">doCorners</string>
+							<string key="candidateClassName">id</string>
+						</object>
 						<object class="IBActionInfo" key="doFlip">
 							<string key="name">doFlip</string>
 							<string key="candidateClassName">id</string>
@@ -507,6 +546,7 @@
 						<string key="accelerateTime">UILabel</string>
 						<string key="coregraphImageView">UIImageView</string>
 						<string key="coregraphTime">UILabel</string>
+						<string key="counterBarItem">UIBarButtonItem</string>
 						<string key="originalImageView">UIImageView</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
@@ -525,6 +565,10 @@
 						<object class="IBToOneOutletInfo" key="coregraphTime">
 							<string key="name">coregraphTime</string>
 							<string key="candidateClassName">UILabel</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="counterBarItem">
+							<string key="name">counterBarItem</string>
+							<string key="candidateClassName">UIBarButtonItem</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="originalImageView">
 							<string key="name">originalImageView</string>
