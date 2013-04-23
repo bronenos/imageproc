@@ -10,6 +10,7 @@
 #import <Accelerate/Accelerate.h>
 #import <sys/time.h>
 #import "ViewController.h"
+#import "UIImage+StackBlur.h"
 
 
 #define MEASURE_CALL_TIME_ADD( time, call ) \
@@ -30,22 +31,31 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	kImageActionScale,
 	kImageActionRotate,
 	kImageActionFlip,
+	kImageActionBlur,
 };
 
 
 @interface ViewController()
 @property(nonatomic, retain) UIImage *coregraphImage;
 @property(nonatomic, retain) UIImage *accelerateImage;
+@property(nonatomic, retain) UIFont *regularFont;
+@property(nonatomic, retain) UIFont *boldFont;
+
+- (UIBarButtonItem *)buttonWithTitle:(NSString *)title selector:(SEL)sel;
 
 - (NSString *)currentAction;
 - (void)updateCounter:(int)counter;
 - (void)generateImages;
+
+- (CGFloat)scaleFactor;
+- (Pixel_8888 *)backgroundColor;
 
 - (void)generateCoregraphImage;
 - (UIImage *)prepareAndGenerateCoregraphImage;
 
 - (void)generateAccelerateImage;
 - (UIImage *)prepareAndGenerateAccelerateImage;
+- (void)accelerateImageWithTransform:(CGAffineTransform *)tf;
 @end
 
 
@@ -59,7 +69,8 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
 	if ((self = [super initWithNibName:nil bundle:nil])) {
-		// ...
+		self.regularFont = [UIFont systemFontOfSize:14.f];
+		self.boldFont = [UIFont boldSystemFontOfSize:15.f];
 	}
 	
 	return self;
@@ -71,7 +82,10 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	[_coregraphImageView release];
 	[_coregraphTime release];
 	[_accelerateImageView release];
+	[_menuToolbar release];
 	[_accelerateTime release];
+	[_regularFont release];
+	[_boldFont release];
 	[super dealloc];
 }
 
@@ -80,7 +94,15 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
-
+	
+	NSMutableArray *menuButtons = [NSMutableArray array];
+	[menuButtons addObject:[self buttonWithTitle:@"Scale" selector:@selector(doScale)]];
+	[menuButtons addObject:[self buttonWithTitle:@"Rotate" selector:@selector(doRotate)]];
+	[menuButtons addObject:[self buttonWithTitle:@"Flip" selector:@selector(doFlip)]];
+	[menuButtons addObject:[self buttonWithTitle:@"Blur" selector:@selector(doBlur)]];
+	[menuButtons addObjectsFromArray:self.menuToolbar.items];
+	self.menuToolbar.items = menuButtons;
+	
 	NSString *origPath = [[NSBundle mainBundle] pathForResource:@"image200" ofType:@"png"];
 	self.originalImageView.image = [UIImage imageWithContentsOfFile:origPath];
 	
@@ -91,23 +113,38 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	self.accelerateTime.hidden = YES;
 }
 
+- (UIBarButtonItem *)buttonWithTitle:(NSString *)title selector:(SEL)sel
+{
+	UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:title
+															   style:UIBarButtonItemStyleBordered
+															  target:self
+															  action:sel];
+	return [button autorelease];
+}
+
 
 #pragma mark - Public Methods
-- (IBAction)doScale
+- (void)doScale
 {
 	_action = kImageActionScale;
 	[self generateImages];
 }
 
-- (IBAction)doRotate
+- (void)doRotate
 {
 	_action = kImageActionRotate;
 	[self generateImages];
 }
 
-- (IBAction)doFlip
+- (void)doFlip
 {
 	_action = kImageActionFlip;
+	[self generateImages];
+}
+
+- (void)doBlur
+{
+	_action = kImageActionBlur;
 	[self generateImages];
 }
 
@@ -115,7 +152,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 #pragma mark - Private Methods
 - (NSString *)currentAction
 {
-	NSArray *actions = @[ @"scale", @"rotate", @"flip" ];
+	NSArray *actions = @[ @"scale", @"rotate", @"flip", @"blur" ];
 	return actions[_action];
 }
 
@@ -136,11 +173,12 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	
 	dispatch_queue_t back_queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
 	dispatch_async(back_queue, ^(void){
+		const size_t timesToRepeat = 250;
 		__block int counter = 0;
 		
 		uint32_t ctime = 0;
 		MEASURE_CALL_TIME_ADD(ctime, ^{
-			for (int i = 0; i < 1000; i++, counter++) {
+			for (int i=0, cnt=timesToRepeat; i<cnt; i++, counter++) {
 				[self generateCoregraphImage];
 				[self updateCounter:counter];
 			}
@@ -148,7 +186,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 		
 		uint32_t atime = 0;
 		MEASURE_CALL_TIME_ADD(atime, ^{
-			for (int i = 0; i < 1000; i++, counter++) {
+			for (int i=0, cnt=timesToRepeat; i<cnt; i++, counter++) {
 				[self generateAccelerateImage];
 				[self updateCounter:counter];
 			}
@@ -162,6 +200,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 			if (self.coregraphImage) {
 				self.coregraphTime.text = [NSString stringWithFormat:@"%u ms", ctime];
+				self.coregraphTime.font = (ctime < atime ? self.boldFont : self.regularFont);
 				self.coregraphTime.hidden = NO;
 			}
 
@@ -171,10 +210,24 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 			if (self.accelerateImage) {
 				self.accelerateTime.text = [NSString stringWithFormat:@"%u ms", atime];
+				self.accelerateTime.font = (atime < ctime ? self.boldFont : self.regularFont);
 				self.accelerateTime.hidden = NO;
 			}
 		});
 	});
+}
+
+- (CGFloat)scaleFactor
+{
+	const CGFloat destWidth = _destBuffer.width;
+	const CGFloat sourceWidth = _sourceBuffer.width;
+	return destWidth / sourceWidth;
+}
+
+- (Pixel_8888 *)backgroundColor
+{
+	static Pixel_8888 backgroundColor = { 0, 0, 0, 0 };
+	return &backgroundColor;
 }
 
 - (void)generateCoregraphImage
@@ -300,6 +353,13 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	return ret;
 }
 
+- (void)accelerateImageWithTransform:(CGAffineTransform *)tf
+{
+	vImageAffineWarp_ARGB8888(
+			&_sourceBuffer, &_destBuffer, NULL,
+			(vImage_CGAffineTransform *)tf, *[self backgroundColor], kvImageBackgroundColorFill
+	);
+}
 
 
 #pragma mark - Scaling
@@ -311,9 +371,10 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (void)scaleAccelerate
 {
-//	vImageUnpremultiplyData_ARGB8888(&_sourceBuffer, &_sourceBuffer, kvImageNoFlags);
-	vImageScale_ARGB8888(&_sourceBuffer, &_destBuffer, NULL, kvImageLeaveAlphaUnchanged);
-//	vImagePremultiplyData_ARGB8888(&_destBuffer, &_destBuffer, kvImageNoFlags);
+	CGAffineTransform tf = CGAffineTransformIdentity;
+	tf = CGAffineTransformScale(tf, [self scaleFactor], [self scaleFactor]);
+	
+	[self accelerateImageWithTransform:&tf];
 }
 
 
@@ -330,11 +391,12 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (void)rotateAccelerate
 {
-	vImageScale_ARGB8888(&_sourceBuffer, &_tmpBuffer, NULL, kvImageLeaveAlphaUnchanged);
-	
-	Pixel_8888 backgroundColor = {0, 0, 0, 0};
-	vImageRotate90_ARGB8888(&_tmpBuffer, &_destBuffer, kRotate90DegreesClockwise, backgroundColor, kvImageNoFlags);
-//	vImageRotate_ARGB8888(&_destBuffer, &_destBuffer, NULL, (float) (M_PI * 1.5f), backgroundColor, kvImageNoFlags);
+	CGAffineTransform tf = CGAffineTransformIdentity;
+	tf = CGAffineTransformRotate(tf, -float(M_PI / 2.f));
+	tf = CGAffineTransformTranslate(tf, -float(_destBuffer.width), 0);
+	tf = CGAffineTransformScale(tf, [self scaleFactor], [self scaleFactor]);
+
+	[self accelerateImageWithTransform:&tf];
 }
 
 
@@ -353,6 +415,51 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 {
 	vImageScale_ARGB8888(&_sourceBuffer, &_tmpBuffer, NULL, kvImageLeaveAlphaUnchanged);
 	vImageVerticalReflect_ARGB8888(&_tmpBuffer, &_destBuffer, kvImageNoFlags);
+	
+	CGAffineTransform tf = CGAffineTransformIdentity;
+	tf = CGAffineTransformRotate(tf, -float(M_PI));
+	tf = CGAffineTransformTranslate(tf, -float(_destBuffer.width), -float(_destBuffer.height));
+	tf = CGAffineTransformScale(tf, -[self scaleFactor], [self scaleFactor]);
+	tf = CGAffineTransformTranslate(tf, -float(_destBuffer.width / [self scaleFactor]), 0);
+
+	[self accelerateImageWithTransform:&tf];
+}
+
+
+#pragma mark - Blur
+- (void)blurCoregraph
+{
+	const CGSize size = self.coregraphImageView.bounds.size;
+	CGContextRef context = UIGraphicsGetCurrentContext();
+	
+	UIImage *blurredImage = [self.originalImageView.image stackBlur:3];
+	[blurredImage drawInRect:((CGRect) {CGPointZero, size})];
+}
+
+- (void)blurAccelerate
+{
+	const size_t kernelWidth = 5;
+	const size_t kernelHeight = 5;
+	
+	const int16_t kernel[kernelWidth * kernelHeight] = {
+			1,	2,	2,	2,	1,
+			2,	4,	8,	4,	2,
+			2,	8,	16,	8,	2,
+			2,	4,	8,	4,	2,
+			1,	2,	2,	2,	1,
+	};
+	
+	int16_t sum = 0;
+	for (int i=0, cnt=kernelWidth*kernelHeight; i<cnt; i++) {
+		sum += kernel[i];
+	}
+
+	vImageScale_ARGB8888(&_sourceBuffer, &_tmpBuffer, NULL, kvImageLeaveAlphaUnchanged);
+	vImageConvolve_ARGB8888(
+			&_tmpBuffer, &_destBuffer, NULL,
+			0, 0, kernel, kernelHeight, kernelWidth,
+			sum, *[self backgroundColor], kvImageBackgroundColorFill
+	);
 }
 
 @end

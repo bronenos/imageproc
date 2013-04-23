@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		16612009B52A8137B584104A /* image200.png in Resources */ = {isa = PBXBuildFile; fileRef = 16612F57E0EFDC449B48E12C /* image200.png */; };
+		166129DDDF49F82380433EF2 /* UIImage+StackBlur.m in Sources */ = {isa = PBXBuildFile; fileRef = 1661224D8A3FCC9A3A3C7B70 /* UIImage+StackBlur.m */; };
 		16612B1C037C53D180070067 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16612E9331FFDDE077512C0C /* Accelerate.framework */; };
 		D48F7C33172256CE00308E0C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D48F7C32172256CE00308E0C /* UIKit.framework */; };
 		D48F7C35172256CE00308E0C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D48F7C34172256CE00308E0C /* Foundation.framework */; };
@@ -23,6 +24,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1661224D8A3FCC9A3A3C7B70 /* UIImage+StackBlur.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+StackBlur.m"; sourceTree = "<group>"; };
+		16612ADEA05B17B50496A7BF /* UIImage+StackBlur.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+StackBlur.h"; sourceTree = "<group>"; };
 		16612E9331FFDDE077512C0C /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		16612F57E0EFDC449B48E12C /* image200.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = image200.png; sourceTree = "<group>"; };
 		D48F7C2F172256CE00308E0C /* ImageProc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageProc.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -96,6 +99,8 @@
 				D48F7C4D172256CE00308E0C /* ViewController.xib */,
 				D48F7C39172256CE00308E0C /* Supporting Files */,
 				16612F57E0EFDC449B48E12C /* image200.png */,
+				1661224D8A3FCC9A3A3C7B70 /* UIImage+StackBlur.m */,
+				16612ADEA05B17B50496A7BF /* UIImage+StackBlur.h */,
 			);
 			path = ImageProc;
 			sourceTree = "<group>";
@@ -184,6 +189,7 @@
 				D48F7C3F172256CE00308E0C /* main.m in Sources */,
 				D48F7C43172256CE00308E0C /* AppDelegate.m in Sources */,
 				D48F7C4C172256CE00308E0C /* ViewController.mm in Sources */,
+				166129DDDF49F82380433EF2 /* UIImage+StackBlur.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
