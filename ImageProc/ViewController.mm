@@ -165,6 +165,9 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (void)generateImages
 {
+	self.menuToolbar.userInteractionEnabled = NO;
+	self.menuToolbar.alpha = .6f;
+	
 	self.coregraphImageView.hidden = YES;
 	self.coregraphTime.hidden = YES;
 	
@@ -213,6 +216,9 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 				self.accelerateTime.font = (atime < ctime ? self.boldFont : self.regularFont);
 				self.accelerateTime.hidden = NO;
 			}
+			
+			self.menuToolbar.alpha = 1.f;
+			self.menuToolbar.userInteractionEnabled = YES;
 		});
 	});
 }
