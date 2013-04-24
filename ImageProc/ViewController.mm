@@ -427,9 +427,6 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (void)flipAccelerate
 {
-	vImageScale_ARGB8888(&_sourceBuffer, &_tmpBuffer, NULL, kvImageLeaveAlphaUnchanged);
-	vImageVerticalReflect_ARGB8888(&_tmpBuffer, &_destBuffer, kvImageNoFlags);
-	
 	CGAffineTransform tf = CGAffineTransformIdentity;
 	tf = CGAffineTransformRotate(tf, -float(M_PI));
 	tf = CGAffineTransformTranslate(tf, -float(_destBuffer.width), -float(_destBuffer.height));
@@ -454,8 +451,9 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 {
 	const size_t kernelWidth = 5;
 	const size_t kernelHeight = 5;
+	const size_t kernelSize = kernelWidth * kernelHeight;
 	
-	const int16_t kernel[kernelWidth * kernelHeight] = {
+	const int16_t kernel[kernelSize] = {
 			1,	2,	2,	2,	1,
 			2,	4,	8,	4,	2,
 			2,	8,	16,	8,	2,
@@ -464,7 +462,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	};
 	
 	int16_t sum = 0;
-	for (int i=0, cnt=kernelWidth*kernelHeight; i<cnt; i++) {
+	for (int i=0; i<kernelSize; i++) {
 		sum += kernel[i];
 	}
 
