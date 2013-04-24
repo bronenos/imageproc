@@ -27,6 +27,9 @@ endTicks -= beginTicks; \
 time += endTicks; \
 }
 
+#define TIMES_TO_REPEAT	250
+
+
 typedef NS_ENUM(NSUInteger, kImageAction) {
 	kImageActionScale,
 	kImageActionRotate,
@@ -69,8 +72,8 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
 	if ((self = [super initWithNibName:nil bundle:nil])) {
-		self.regularFont = [UIFont systemFontOfSize:14.f];
-		self.boldFont = [UIFont boldSystemFontOfSize:15.f];
+		self.regularFont = [UIFont systemFontOfSize:13.f];
+		self.boldFont = [UIFont systemFontOfSize:15.f];
 	}
 	
 	return self;
@@ -102,6 +105,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	[menuButtons addObject:[self buttonWithTitle:@"Blur" selector:@selector(doBlur)]];
 	[menuButtons addObjectsFromArray:self.menuToolbar.items];
 	self.menuToolbar.items = menuButtons;
+	self.counterBarItem.title = @"";
 	
 	NSString *origPath = [[NSBundle mainBundle] pathForResource:@"image200" ofType:@"png"];
 	self.originalImageView.image = [UIImage imageWithContentsOfFile:origPath];
@@ -159,7 +163,8 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (void)updateCounter:(int)counter
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		self.counterBarItem.title = [NSString stringWithFormat:@"%d", counter];
+		int cnt = TIMES_TO_REPEAT * 2 - counter;
+		self.counterBarItem.title = cnt ? [NSString stringWithFormat:@"%d", cnt] : @"";
 	});
 }
 
@@ -176,46 +181,49 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	
 	dispatch_queue_t back_queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
 	dispatch_async(back_queue, ^(void){
-		const size_t timesToRepeat = 250;
 		__block int counter = 0;
 		
 		uint32_t ctime = 0;
 		MEASURE_CALL_TIME_ADD(ctime, ^{
-			for (int i=0, cnt=timesToRepeat; i<cnt; i++, counter++) {
+			for (int i=0; i<TIMES_TO_REPEAT; i++, counter++) {
 				[self generateCoregraphImage];
 				[self updateCounter:counter];
 			}
 		});
 		
+		dispatch_async(dispatch_get_main_queue(), ^{
+			self.coregraphImageView.image = self.coregraphImage;
+			self.coregraphImageView.hidden = NO;
+			
+			if (self.coregraphImage) {
+				self.coregraphTime.text = [NSString stringWithFormat:@"%u ms", ctime];
+				self.coregraphTime.hidden = NO;
+			}
+		});
+		
 		uint32_t atime = 0;
 		MEASURE_CALL_TIME_ADD(atime, ^{
-			for (int i=0, cnt=timesToRepeat; i<cnt; i++, counter++) {
+			for (int i=0; i<TIMES_TO_REPEAT; i++, counter++) {
 				[self generateAccelerateImage];
 				[self updateCounter:counter];
 			}
 		});
 
+		dispatch_async(dispatch_get_main_queue(), ^{
+			self.accelerateImageView.image = self.accelerateImage;
+			self.accelerateImageView.hidden = NO;
+			
+			if (self.accelerateImage) {
+				self.accelerateTime.text = [NSString stringWithFormat:@"%u ms", atime];
+				self.accelerateTime.hidden = NO;
+			}
+		});
+		
 		[self updateCounter:counter];
 		
 		dispatch_async(dispatch_get_main_queue(), ^{
-			self.coregraphImageView.image = self.coregraphImage;
-			self.coregraphImageView.hidden = NO;
-
-			if (self.coregraphImage) {
-				self.coregraphTime.text = [NSString stringWithFormat:@"%u ms", ctime];
-				self.coregraphTime.font = (ctime < atime ? self.boldFont : self.regularFont);
-				self.coregraphTime.hidden = NO;
-			}
-
-			
-			self.accelerateImageView.image = self.accelerateImage;
-			self.accelerateImageView.hidden = NO;
-
-			if (self.accelerateImage) {
-				self.accelerateTime.text = [NSString stringWithFormat:@"%u ms", atime];
-				self.accelerateTime.font = (atime < ctime ? self.boldFont : self.regularFont);
-				self.accelerateTime.hidden = NO;
-			}
+			self.coregraphTime.font = (ctime < atime ? self.boldFont : self.regularFont);
+			self.accelerateTime.font = (atime < ctime ? self.boldFont : self.regularFont);
 			
 			self.menuToolbar.alpha = 1.f;
 			self.menuToolbar.userInteractionEnabled = YES;
@@ -436,7 +444,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (void)blurCoregraph
 {
 	const CGSize size = self.coregraphImageView.bounds.size;
-	CGContextRef context = UIGraphicsGetCurrentContext();
+//	CGContextRef context = UIGraphicsGetCurrentContext();
 	
 	UIImage *blurredImage = [self.originalImageView.image stackBlur:3];
 	[blurredImage drawInRect:((CGRect) {CGPointZero, size})];
