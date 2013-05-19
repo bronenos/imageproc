@@ -21,6 +21,7 @@
 		D48F7C49172256CE00308E0C /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D48F7C48172256CE00308E0C /* Default-568h@2x.png */; };
 		D48F7C4C172256CE00308E0C /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = D48F7C4B172256CE00308E0C /* ViewController.mm */; };
 		D48F7C4F172256CE00308E0C /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D48F7C4D172256CE00308E0C /* ViewController.xib */; };
+		D4FCB0461748E6540075683C /* image120.png in Resources */ = {isa = PBXBuildFile; fileRef = D4FCB0451748E6540075683C /* image120.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		D48F7C4A172256CE00308E0C /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		D48F7C4B172256CE00308E0C /* ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
 		D48F7C4E172256CE00308E0C /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController.xib; sourceTree = "<group>"; };
+		D4FCB0451748E6540075683C /* image120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = image120.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +101,7 @@
 				D48F7C4D172256CE00308E0C /* ViewController.xib */,
 				D48F7C39172256CE00308E0C /* Supporting Files */,
 				16612F57E0EFDC449B48E12C /* image200.png */,
+				D4FCB0451748E6540075683C /* image120.png */,
 				1661224D8A3FCC9A3A3C7B70 /* UIImage+StackBlur.m */,
 				16612ADEA05B17B50496A7BF /* UIImage+StackBlur.h */,
 			);
@@ -176,6 +179,7 @@
 				D48F7C49172256CE00308E0C /* Default-568h@2x.png in Resources */,
 				D48F7C4F172256CE00308E0C /* ViewController.xib in Resources */,
 				16612009B52A8137B584104A /* image200.png in Resources */,
+				D4FCB0461748E6540075683C /* image120.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -310,6 +314,7 @@
 				D48F7C54172256CE00308E0C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

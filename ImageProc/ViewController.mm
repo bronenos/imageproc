@@ -50,13 +50,11 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (void)updateCounter:(int)counter;
 - (void)generateImages;
 
+- (UIImage *)sourceImage;
 - (CGFloat)scaleFactor;
 - (Pixel_8888 *)backgroundColor;
 
-- (void)generateCoregraphImage;
 - (UIImage *)prepareAndGenerateCoregraphImage;
-
-- (void)generateAccelerateImage;
 - (UIImage *)prepareAndGenerateAccelerateImage;
 - (void)accelerateImageWithTransform:(CGAffineTransform *)tf;
 @end
@@ -64,6 +62,8 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 @implementation ViewController
 {
+	UIImage *_orig120;
+	UIImage *_orig200;
 	kImageAction _action;
 	vImage_Buffer _sourceBuffer, _destBuffer;
 }
@@ -72,6 +72,12 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
 	if ((self = [super initWithNibName:nil bundle:nil])) {
+		_orig120 = [UIImage imageNamed:@"image120.png"];
+		_orig120 = [[UIImage imageWithCGImage:_orig120.CGImage] retain];
+		
+		_orig200 = [UIImage imageNamed:@"image200.png"];
+		_orig200 = [[UIImage imageWithCGImage:_orig200.CGImage] retain];
+		
 		self.regularFont = [UIFont systemFontOfSize:13.f];
 		self.boldFont = [UIFont systemFontOfSize:15.f];
 	}
@@ -89,6 +95,8 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	[_accelerateTime release];
 	[_regularFont release];
 	[_boldFont release];
+	[_orig120 release];
+	[_orig200 release];
 	[super dealloc];
 }
 
@@ -107,8 +115,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	self.menuToolbar.items = menuButtons;
 	self.counterBarItem.title = @"";
 	
-	NSString *origPath = [[NSBundle mainBundle] pathForResource:@"image200" ofType:@"png"];
-	self.originalImageView.image = [UIImage imageWithContentsOfFile:origPath];
+	self.originalImageView.image = _orig200;
 	
 	self.coregraphImageView.hidden = YES;
 	self.coregraphTime.hidden = YES;
@@ -124,6 +131,16 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 															  target:self
 															  action:sel];
 	return [button autorelease];
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+{
+	return NO;
+}
+
+- (BOOL)shouldAutorotate
+{
+	return NO;
 }
 
 
@@ -189,7 +206,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 		uint32_t ctime = 0;
 		MEASURE_CALL_TIME_ADD(ctime, ^{
 			for (int i=0; i<TIMES_TO_REPEAT; i++, counter++) {
-				[self generateCoregraphImage];
+				self.coregraphImage = [self prepareAndGenerateCoregraphImage];
 				[self updateCounter:counter];
 			}
 		});
@@ -207,7 +224,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 		uint32_t atime = 0;
 		MEASURE_CALL_TIME_ADD(atime, ^{
 			for (int i=0; i<TIMES_TO_REPEAT; i++, counter++) {
-				[self generateAccelerateImage];
+				self.accelerateImage = [self prepareAndGenerateAccelerateImage];
 				[self updateCounter:counter];
 			}
 		});
@@ -234,6 +251,12 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	});
 }
 
+- (UIImage *)sourceImage
+{
+	const BOOL isScale = (_action == kImageActionScale);
+	return isScale ? _orig200 : _orig120;
+}
+
 - (CGFloat)scaleFactor
 {
 	const CGFloat destWidth = _destBuffer.width;
@@ -245,16 +268,6 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 {
 	static Pixel_8888 backgroundColor = { 0, 0, 0, 0 };
 	return &backgroundColor;
-}
-
-- (void)generateCoregraphImage
-{
-	UIImage *origImage = self.originalImageView.image;
-	if (origImage == nil) {
-		return;
-	}
-
-	self.coregraphImage = [self prepareAndGenerateCoregraphImage];
 }
 
 - (UIImage *)prepareAndGenerateCoregraphImage
@@ -271,17 +284,6 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	return ret;
 }
 
-
-- (void)generateAccelerateImage
-{
-	UIImage *origImage = self.originalImageView.image;
-	if (origImage == nil) {
-		return;
-	}
-
-	self.accelerateImage = [self prepareAndGenerateAccelerateImage];
-}
-
 - (UIImage *)prepareAndGenerateAccelerateImage
 {
 	// SP - general info
@@ -291,7 +293,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	const CGBitmapInfo bitmapInfo = kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Big;
 
 	// SP - source info
-	const CGImageRef sourceRef = self.originalImageView.image.CGImage;
+	const CGImageRef sourceRef = [self sourceImage].CGImage;
 	const NSUInteger sourceWidth = CGImageGetWidth(sourceRef);
 	const NSUInteger sourceHeight = CGImageGetHeight(sourceRef);
 	const NSUInteger sourceBytesPerRow = sourceWidth * bytesPerPixel;
@@ -367,8 +369,8 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (void)accelerateImageWithTransform:(CGAffineTransform *)tf
 {
 	vImageAffineWarp_ARGB8888(
-			&_sourceBuffer, &_destBuffer, NULL,
-			(vImage_CGAffineTransform *)tf, *[self backgroundColor], kvImageBackgroundColorFill
+		&_sourceBuffer, &_destBuffer, NULL,
+		(vImage_CGAffineTransform *)tf, *[self backgroundColor], kvImageBackgroundColorFill
 	);
 }
 
@@ -377,7 +379,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (void)scaleCoregraph
 {
 	const CGSize size = self.coregraphImageView.bounds.size;
-	[self.originalImageView.image drawInRect:((CGRect) {CGPointZero, size})];
+	[[self sourceImage] drawInRect:((CGRect) {CGPointZero, size})];
 }
 
 - (void)scaleAccelerate
@@ -397,13 +399,13 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 	CGContextRotateCTM(context, (float)(M_PI * .5f));
 	CGContextTranslateCTM(context, 0, -size.height);
-	[self.originalImageView.image drawInRect:((CGRect) {CGPointZero, size})];
+	[[self sourceImage] drawInRect:((CGRect) {CGPointZero, size})];
 }
 
 - (void)rotateAccelerate
 {
 	vImageRotate90_ARGB8888(
-		&_sourceBuffer, &_destBuffer, kRotate180DegreesClockwise,
+		&_sourceBuffer, &_destBuffer, kRotate90DegreesClockwise,
 		*[self backgroundColor], kvImageBackgroundColorFill
 	);
 }
@@ -417,7 +419,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 	CGContextScaleCTM(context, 1.f, -1.f);
 	CGContextTranslateCTM(context, 0, -size.height);
-	[self.originalImageView.image drawInRect:((CGRect) {CGPointZero, size})];
+	[[self sourceImage] drawInRect:((CGRect) {CGPointZero, size})];
 }
 
 - (void)flipAccelerate
@@ -435,7 +437,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	const CGSize size = self.coregraphImageView.bounds.size;
 //	CGContextRef context = UIGraphicsGetCurrentContext();
 	
-	UIImage *blurredImage = [self.originalImageView.image stackBlur:3];
+	UIImage *blurredImage = [[self sourceImage] stackBlur:3];
 	[blurredImage drawInRect:((CGRect) {CGPointZero, size})];
 }
 
@@ -458,13 +460,8 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 		sum += kernel[i];
 	}
 
-	vImageScale_ARGB8888(
-			&_sourceBuffer, &_destBuffer, NULL,
-			kvImageLeaveAlphaUnchanged
-	);
-	
 	vImageConvolve_ARGB8888(
-			&_destBuffer, &_destBuffer, NULL,
+			&_sourceBuffer, &_destBuffer, NULL,
 			0, 0, kernel, kernelHeight, kernelWidth, sum,
 			*[self backgroundColor], kvImageBackgroundColorFill
 	);
