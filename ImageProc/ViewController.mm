@@ -56,7 +56,6 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (UIImage *)prepareAndGenerateCoregraphImage;
 - (UIImage *)prepareAndGenerateAccelerateImage;
-- (void)accelerateImageWithTransform:(CGAffineTransform *)tf;
 @end
 
 
@@ -364,14 +363,6 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	free(destData);
 
 	return ret;
-}
-
-- (void)accelerateImageWithTransform:(CGAffineTransform *)tf
-{
-	vImageAffineWarp_ARGB8888(
-		&_sourceBuffer, &_destBuffer, NULL,
-		(vImage_CGAffineTransform *)tf, *[self backgroundColor], kvImageBackgroundColorFill
-	);
 }
 
 
