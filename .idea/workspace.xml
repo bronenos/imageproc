@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b6d69fe4-39bb-423b-8426-8a7972fc702d" name="Default" comment="" />
+    <list default="true" id="b6d69fe4-39bb-423b-8426-8a7972fc702d" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageProc.xcodeproj/project.xcworkspace/xcuserdata/bronenos.xcuserdatad/UserInterfaceState.xcuserstate" afterPath="$PROJECT_DIR$/ImageProc.xcodeproj/project.xcworkspace/xcuserdata/bronenos.xcuserdatad/UserInterfaceState.xcuserstate" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+    </list>
     <ignored path="ImageProc.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="b6d69fe4-39bb-423b-8426-8a7972fc702d" time="1366743087113" ignored="false" />
+    <file path="/Dummy.txt" changelist="b6d69fe4-39bb-423b-8426-8a7972fc702d" time="1367039047369" ignored="false" />
     <file path="/ViewController.m" changelist="b6d69fe4-39bb-423b-8426-8a7972fc702d" time="1366436860525" ignored="false" />
     <file path="/GDB" changelist="b6d69fe4-39bb-423b-8426-8a7972fc702d" time="1366455820266" ignored="false" />
     <file path="/ViewController.mm" changelist="b6d69fe4-39bb-423b-8426-8a7972fc702d" time="1366749801920" ignored="false" />
@@ -28,6 +31,15 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
+      <file leaf-file-name="CGAffineTransform.h" pinned="false" current="false" current-in-tab="false">
+        <entry file="file:///Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CGAffineTransform.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="7" column="33" selection-start="196" selection-end="196" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="ImageProc-Info.plist" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ImageProc/ImageProc-Info.plist">
           <provider selected="true" editor-type-id="text-editor">
@@ -112,16 +124,7 @@
       <file leaf-file-name="ViewController.mm" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ImageProc/ViewController.mm">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="449" column="6" selection-start="12108" selection-end="12108" vertical-scroll-proportion="0.31325302">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CGAffineTransform.h" pinned="false" current="false" current-in-tab="false">
-        <entry file="file:///Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CGAffineTransform.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="33" selection-start="196" selection-end="196" vertical-scroll-proportion="0.0">
+            <state line="449" column="6" selection-start="12053" selection-end="12053" vertical-scroll-proportion="0.24968153">
               <folding />
             </state>
           </provider>
@@ -171,7 +174,7 @@
     <option name="STATE" value="0" />
   </component>
   <component name="ProjectView">
-    <navigator currentView="ProjectPane" proportions="" version="1" splitterProportion="0.5">
+    <navigator proportions="" version="1" splitterProportion="0.5">
       <flattenPackages />
       <showMembers />
       <showModules />
@@ -182,37 +185,7 @@
       <autoscrollFromSource />
       <sortByType />
     </navigator>
-    <panes>
-      <pane id="DirectoryView.Xcode" />
-      <pane id="ProjectPane">
-        <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" />
-              <option name="myItemType" value="com.jetbrains.cidr.projectView.XcodeRootNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ImageProc" />
-              <option name="myItemType" value="com.jetbrains.cidr.projectView.XcodeProjectNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" />
-              <option name="myItemType" value="com.jetbrains.cidr.projectView.XcodeRootNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ImageProc" />
-              <option name="myItemType" value="com.jetbrains.cidr.projectView.XcodeProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ImageProc" />
-              <option name="myItemType" value="com.jetbrains.cidr.projectView.XcodeViewNode" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
-      </pane>
-    </panes>
+    <panes />
   </component>
   <component name="PropertiesComponent">
     <property name="options.splitter.main.proportions" value="0.3" />
@@ -247,7 +220,6 @@
     <frame x="0" y="22" width="1436" height="878" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32908162" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -261,6 +233,7 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32908162" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32908162" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -437,7 +410,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ImageProc/ViewController.mm">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="449" column="6" selection-start="12108" selection-end="12108" vertical-scroll-proportion="0.31325302">
+        <state line="449" column="6" selection-start="12053" selection-end="12053" vertical-scroll-proportion="0.24968153">
           <folding />
         </state>
       </provider>

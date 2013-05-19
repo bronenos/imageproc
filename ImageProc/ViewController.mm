@@ -65,7 +65,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 @implementation ViewController
 {
 	kImageAction _action;
-	vImage_Buffer _sourceBuffer, _destBuffer, _tmpBuffer;
+	vImage_Buffer _sourceBuffer, _destBuffer;
 }
 
 #pragma mark - Memory
@@ -196,7 +196,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 			self.coregraphImageView.hidden = NO;
 			
 			if (self.coregraphImage) {
-				self.coregraphTime.text = [NSString stringWithFormat:@"%u ms", ctime];
+				self.coregraphTime.text = [NSString stringWithFormat:@"%u ms", ctime / TIMES_TO_REPEAT];
 				self.coregraphTime.hidden = NO;
 			}
 		});
@@ -214,7 +214,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 			self.accelerateImageView.hidden = NO;
 			
 			if (self.accelerateImage) {
-				self.accelerateTime.text = [NSString stringWithFormat:@"%u ms", atime];
+				self.accelerateTime.text = [NSString stringWithFormat:@"%u ms", atime / TIMES_TO_REPEAT];
 				self.accelerateTime.hidden = NO;
 			}
 		});
@@ -319,7 +319,6 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	
 	size_t destCount = destWidth * destHeight * bytesPerPixel;
 	unsigned char *destData = (unsigned char *) calloc(destCount, sizeof(unsigned char));
-	unsigned char *tmpData = (unsigned char *) calloc(destCount, sizeof(unsigned char));
 
 	// SP - destination context
 	CGContextRef destContext = CGBitmapContextCreate(
@@ -342,11 +341,6 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	_destBuffer.width = destWidth;
 	_destBuffer.height = destHeight;
 	_destBuffer.rowBytes = destBytesPerRow;
-	
-	_tmpBuffer.data = tmpData;
-	_tmpBuffer.width = _destBuffer.width;
-	_tmpBuffer.height = _destBuffer.height;
-	_tmpBuffer.rowBytes = _destBuffer.rowBytes;
 	
 	NSString *action = [[self currentAction] stringByAppendingString:@"Accelerate"];
 	[self performSelector:NSSelectorFromString(action)];
@@ -385,10 +379,10 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (void)scaleAccelerate
 {
-	CGAffineTransform tf = CGAffineTransformIdentity;
-	tf = CGAffineTransformScale(tf, [self scaleFactor], [self scaleFactor]);
-	
-	[self accelerateImageWithTransform:&tf];
+	vImageScale_ARGB8888(
+		&_sourceBuffer, &_destBuffer, NULL,
+		kvImageNoFlags
+	);
 }
 
 
@@ -405,12 +399,10 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (void)rotateAccelerate
 {
-	CGAffineTransform tf = CGAffineTransformIdentity;
-	tf = CGAffineTransformRotate(tf, -float(M_PI / 2.f));
-	tf = CGAffineTransformTranslate(tf, -float(_destBuffer.width), 0);
-	tf = CGAffineTransformScale(tf, [self scaleFactor], [self scaleFactor]);
-
-	[self accelerateImageWithTransform:&tf];
+	vImageRotate90_ARGB8888(
+		&_sourceBuffer, &_destBuffer, kRotate180DegreesClockwise,
+		*[self backgroundColor], kvImageBackgroundColorFill
+	);
 }
 
 
@@ -427,13 +419,10 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (void)flipAccelerate
 {
-	CGAffineTransform tf = CGAffineTransformIdentity;
-	tf = CGAffineTransformRotate(tf, -float(M_PI));
-	tf = CGAffineTransformTranslate(tf, -float(_destBuffer.width), -float(_destBuffer.height));
-	tf = CGAffineTransformScale(tf, -[self scaleFactor], [self scaleFactor]);
-	tf = CGAffineTransformTranslate(tf, -float(_destBuffer.width / [self scaleFactor]), 0);
-
-	[self accelerateImageWithTransform:&tf];
+	vImageVerticalReflect_ARGB8888(
+		&_sourceBuffer, &_destBuffer,
+		kvImageNoFlags
+	);
 }
 
 
@@ -466,11 +455,15 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 		sum += kernel[i];
 	}
 
-	vImageScale_ARGB8888(&_sourceBuffer, &_tmpBuffer, NULL, kvImageLeaveAlphaUnchanged);
+	vImageScale_ARGB8888(
+			&_sourceBuffer, &_destBuffer, NULL,
+			kvImageLeaveAlphaUnchanged
+	);
+	
 	vImageConvolve_ARGB8888(
-			&_tmpBuffer, &_destBuffer, NULL,
-			0, 0, kernel, kernelHeight, kernelWidth,
-			sum, *[self backgroundColor], kvImageBackgroundColorFill
+			&_destBuffer, &_destBuffer, NULL,
+			0, 0, kernel, kernelHeight, kernelWidth, sum,
+			*[self backgroundColor], kvImageBackgroundColorFill
 	);
 }
 
