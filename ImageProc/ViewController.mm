@@ -179,6 +179,9 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	self.accelerateImageView.hidden = YES;
 	self.accelerateTime.hidden = YES;
 	
+	self.coregraphTime.font = self.regularFont;
+	self.accelerateTime.font = self.regularFont;
+	
 	dispatch_queue_t back_queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
 	dispatch_async(back_queue, ^(void){
 		__block int counter = 0;
@@ -443,11 +446,11 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	const size_t kernelSize = kernelWidth * kernelHeight;
 	
 	const int16_t kernel[kernelSize] = {
-			1,	2,	2,	2,	1,
+			1,	2,	4,	2,	1,
 			2,	4,	8,	4,	2,
-			2,	8,	16,	8,	2,
+			4,	8,	16,	8,	4,
 			2,	4,	8,	4,	2,
-			1,	2,	2,	2,	1,
+			1,	2,	4,	2,	1,
 	};
 	
 	int16_t sum = 0;
