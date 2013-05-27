@@ -64,7 +64,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	UIImage *_orig120;
 	UIImage *_orig200;
 	kImageAction _action;
-	vImage_Buffer _sourceBuffer, _destBuffer;
+	vImage_Buffer _sourceInfo, _destInfo;
 }
 
 #pragma mark - Memory
@@ -258,8 +258,8 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 - (CGFloat)scaleFactor
 {
-	const CGFloat destWidth = _destBuffer.width;
-	const CGFloat sourceWidth = _sourceBuffer.width;
+	const CGFloat destWidth = _destInfo.width;
+	const CGFloat sourceWidth = _sourceInfo.width;
 	return destWidth / sourceWidth;
 }
 
@@ -336,15 +336,15 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	);
 
 	// SP - draw into destination using Accelerate framework
-	_sourceBuffer.data = sourceData;
-	_sourceBuffer.width = sourceWidth;
-	_sourceBuffer.height = sourceHeight;
-	_sourceBuffer.rowBytes = sourceBytesPerRow;
+	_sourceInfo.data = sourceData;
+	_sourceInfo.width = sourceWidth;
+	_sourceInfo.height = sourceHeight;
+	_sourceInfo.rowBytes = sourceBytesPerRow;
 
-	_destBuffer.data = destData;
-	_destBuffer.width = destWidth;
-	_destBuffer.height = destHeight;
-	_destBuffer.rowBytes = destBytesPerRow;
+	_destInfo.data = destData;
+	_destInfo.width = destWidth;
+	_destInfo.height = destHeight;
+	_destInfo.rowBytes = destBytesPerRow;
 	
 	NSString *action = [[self currentAction] stringByAppendingString:@"Accelerate"];
 	[self performSelector:NSSelectorFromString(action)];
@@ -376,7 +376,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (void)scaleAccelerate
 {
 	vImageScale_ARGB8888(
-		&_sourceBuffer, &_destBuffer, NULL,
+		&_sourceInfo, &_destInfo, NULL,
 		kvImageNoFlags
 	);
 }
@@ -396,7 +396,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (void)rotateAccelerate
 {
 	vImageRotate90_ARGB8888(
-		&_sourceBuffer, &_destBuffer, kRotate90DegreesClockwise,
+		&_sourceInfo, &_destInfo, kRotate90DegreesClockwise,
 		*[self backgroundColor], kvImageBackgroundColorFill
 	);
 }
@@ -416,7 +416,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (void)flipAccelerate
 {
 	vImageVerticalReflect_ARGB8888(
-		&_sourceBuffer, &_destBuffer,
+		&_sourceInfo, &_destInfo,
 		kvImageNoFlags
 	);
 }
@@ -452,7 +452,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	}
 
 	vImageConvolve_ARGB8888(
-			&_sourceBuffer, &_destBuffer, NULL,
+			&_sourceInfo, &_destInfo, NULL,
 			0, 0, kernel, kernelHeight, kernelWidth, sum,
 			*[self backgroundColor], kvImageBackgroundColorFill
 	);
