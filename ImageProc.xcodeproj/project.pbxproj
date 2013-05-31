@@ -10,6 +10,7 @@
 		16612009B52A8137B584104A /* image200.png in Resources */ = {isa = PBXBuildFile; fileRef = 16612F57E0EFDC449B48E12C /* image200.png */; };
 		166129DDDF49F82380433EF2 /* UIImage+StackBlur.m in Sources */ = {isa = PBXBuildFile; fileRef = 1661224D8A3FCC9A3A3C7B70 /* UIImage+StackBlur.m */; };
 		16612B1C037C53D180070067 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16612E9331FFDDE077512C0C /* Accelerate.framework */; };
+		D40DEBDC17588C79003263C3 /* image1200.png in Resources */ = {isa = PBXBuildFile; fileRef = D40DEBDB17588C79003263C3 /* image1200.png */; };
 		D48F7C33172256CE00308E0C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D48F7C32172256CE00308E0C /* UIKit.framework */; };
 		D48F7C35172256CE00308E0C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D48F7C34172256CE00308E0C /* Foundation.framework */; };
 		D48F7C37172256CE00308E0C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D48F7C36172256CE00308E0C /* CoreGraphics.framework */; };
@@ -29,6 +30,7 @@
 		16612ADEA05B17B50496A7BF /* UIImage+StackBlur.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+StackBlur.h"; sourceTree = "<group>"; };
 		16612E9331FFDDE077512C0C /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		16612F57E0EFDC449B48E12C /* image200.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = image200.png; sourceTree = "<group>"; };
+		D40DEBDB17588C79003263C3 /* image1200.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = image1200.png; sourceTree = "<group>"; };
 		D48F7C2F172256CE00308E0C /* ImageProc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageProc.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D48F7C32172256CE00308E0C /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		D48F7C34172256CE00308E0C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -102,6 +104,7 @@
 				D48F7C39172256CE00308E0C /* Supporting Files */,
 				16612F57E0EFDC449B48E12C /* image200.png */,
 				D4FCB0451748E6540075683C /* image120.png */,
+				D40DEBDB17588C79003263C3 /* image1200.png */,
 				1661224D8A3FCC9A3A3C7B70 /* UIImage+StackBlur.m */,
 				16612ADEA05B17B50496A7BF /* UIImage+StackBlur.h */,
 			);
@@ -180,6 +183,7 @@
 				D48F7C4F172256CE00308E0C /* ViewController.xib in Resources */,
 				16612009B52A8137B584104A /* image200.png in Resources */,
 				D4FCB0461748E6540075683C /* image120.png in Resources */,
+				D40DEBDC17588C79003263C3 /* image1200.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

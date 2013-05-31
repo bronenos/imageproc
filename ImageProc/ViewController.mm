@@ -27,8 +27,6 @@ endTicks -= beginTicks; \
 time += endTicks; \
 }
 
-#define TIMES_TO_REPEAT	250
-
 
 typedef NS_ENUM(NSUInteger, kImageAction) {
 	kImageActionScale,
@@ -45,8 +43,13 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 @property(nonatomic, retain) UIFont *boldFont;
 
 - (UIBarButtonItem *)buttonWithTitle:(NSString *)title selector:(SEL)sel;
+- (void)updateToolbarMenu;
+- (void)updateLayout;
 
+- (NSInteger)timesToRepeat;
+- (BOOL)shouldShow;
 - (NSString *)currentAction;
+
 - (void)updateCounter:(int)counter;
 - (void)generateImages;
 
@@ -63,6 +66,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 {
 	UIImage *_orig120;
 	UIImage *_orig200;
+	UIImage *_orig1200;
 	kImageAction _action;
 	vImage_Buffer _sourceInfo, _destInfo;
 }
@@ -76,6 +80,9 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 		
 		_orig200 = [UIImage imageNamed:@"image200.png"];
 		_orig200 = [[UIImage imageWithCGImage:_orig200.CGImage] retain];
+		
+		_orig1200 = [UIImage imageNamed:@"image1200.png"];
+		_orig1200 = [[UIImage imageWithCGImage:_orig1200.CGImage] retain];
 		
 		self.regularFont = [UIFont systemFontOfSize:13.f];
 		self.boldFont = [UIFont systemFontOfSize:15.f];
@@ -91,11 +98,14 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	[_coregraphTime release];
 	[_accelerateImageView release];
 	[_menuToolbar release];
+	[_counterBarItem release];
+	[_switcherBarItem release];
 	[_accelerateTime release];
 	[_regularFont release];
 	[_boldFont release];
 	[_orig120 release];
 	[_orig200 release];
+	[_orig1200 release];
 	[super dealloc];
 }
 
@@ -105,14 +115,9 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 {
 	[super viewDidLoad];
 	
-	NSMutableArray *menuButtons = [NSMutableArray array];
-	[menuButtons addObject:[self buttonWithTitle:@"Scale" selector:@selector(doScale)]];
-	[menuButtons addObject:[self buttonWithTitle:@"Rotate" selector:@selector(doRotate)]];
-	[menuButtons addObject:[self buttonWithTitle:@"Flip" selector:@selector(doFlip)]];
-	[menuButtons addObject:[self buttonWithTitle:@"Blur" selector:@selector(doBlur)]];
-	[menuButtons addObjectsFromArray:self.menuToolbar.items];
-	self.menuToolbar.items = menuButtons;
 	self.counterBarItem.title = @"";
+	self.switcherBarItem.customView.transform = CGAffineTransformMakeScale(.75f, .75f);
+	[self updateToolbarMenu];
 	
 	self.originalImageView.image = _orig200;
 	
@@ -132,6 +137,66 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	return [button autorelease];
 }
 
+- (void)updateToolbarMenu
+{
+	UIBarButtonItem *space = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+	[space autorelease];
+	
+	NSMutableArray *menuButtons = [NSMutableArray array];
+	[menuButtons addObject:[self buttonWithTitle:@"Scale" selector:@selector(doScale)]];
+	[menuButtons addObject:[self buttonWithTitle:@"Rotate" selector:@selector(doRotate)]];
+	[menuButtons addObject:[self buttonWithTitle:@"Flip" selector:@selector(doFlip)]];
+	[menuButtons addObject:[self buttonWithTitle:@"Blur" selector:@selector(doBlur)]];
+	[menuButtons addObject:space];
+	[menuButtons addObject:(self.menuToolbar.userInteractionEnabled ? _switcherBarItem : _counterBarItem)];
+	self.menuToolbar.items = menuButtons;
+}
+
+- (void)updateLayout
+{
+	dispatch_block_t hideTimeBlock = ^{
+		self.coregraphTime.alpha = 0;
+		self.accelerateTime.alpha = 0;
+	};
+	
+	dispatch_block_t restoreTimeBlock = ^{
+		self.coregraphTime.text = @"";
+		self.accelerateTime.text = @"";
+		
+		self.coregraphTime.alpha = 1.f;
+		self.accelerateTime.alpha = 1.f;
+	};
+	
+	if ([self shouldShow]) {
+		[UIView animateWithDuration:.25f animations:^{
+			hideTimeBlock();
+		} completion:^(BOOL fin){
+			[UIView animateWithDuration:.25f animations:^{
+				_coregraphImageView.alpha = 1.f;
+				_accelerateImageView.alpha = 1.f;
+			}];
+			
+			_coregraphTime.transform = CGAffineTransformIdentity;
+			_accelerateTime.transform = CGAffineTransformIdentity;
+			restoreTimeBlock();
+		}];
+	}
+	else {
+		[UIView animateWithDuration:.25f animations:^{
+			self.coregraphImageView.alpha = 0;
+			self.accelerateImageView.alpha = 0;
+			
+			hideTimeBlock();
+		} completion:^(BOOL fin){
+			const CGFloat dy = _coregraphTime.frame.origin.y - _coregraphImageView.frame.origin.y;
+			self.coregraphTime.transform = CGAffineTransformMakeTranslation(0, -dy);
+			self.accelerateTime.transform = CGAffineTransformMakeTranslation(0, -dy);
+			
+			restoreTimeBlock();
+		}];
+	}
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
 	return NO;
@@ -144,6 +209,11 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 
 #pragma mark - Public Methods
+- (IBAction)onSwitcher:(UISwitch *)sender
+{
+	[self updateLayout];
+}
+
 - (void)doScale
 {
 	_action = kImageActionScale;
@@ -170,6 +240,17 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 
 
 #pragma mark - Private Methods
+- (NSInteger)timesToRepeat
+{
+	return 25;
+}
+
+- (BOOL)shouldShow
+{
+	UISwitch *sw = (id) _switcherBarItem.customView.subviews[0];
+	return sw.isOn;
+}
+
 - (NSString *)currentAction
 {
 	NSArray *actions = @[ @"scale", @"rotate", @"flip", @"blur" ];
@@ -179,7 +260,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 - (void)updateCounter:(int)counter
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		int cnt = TIMES_TO_REPEAT * 2 - counter;
+		int cnt = [self timesToRepeat] * 2 - counter;
 		self.counterBarItem.title = cnt ? [NSString stringWithFormat:@"%d", cnt] : @"";
 	});
 }
@@ -188,6 +269,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 {
 	self.menuToolbar.userInteractionEnabled = NO;
 	self.menuToolbar.alpha = .6f;
+	[self updateToolbarMenu];
 	
 	self.coregraphImageView.hidden = YES;
 	self.coregraphTime.hidden = YES;
@@ -201,39 +283,44 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	dispatch_queue_t back_queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
 	dispatch_async(back_queue, ^(void){
 		__block int counter = 0;
+		[self updateCounter:counter];
 		
 		uint32_t ctime = 0;
 		MEASURE_CALL_TIME_ADD(ctime, ^{
-			for (int i=0; i<TIMES_TO_REPEAT; i++, counter++) {
+			for (int i=0; i<[self timesToRepeat]; i++, counter++) {
 				self.coregraphImage = [self prepareAndGenerateCoregraphImage];
 				[self updateCounter:counter];
 			}
 		});
 		
 		dispatch_async(dispatch_get_main_queue(), ^{
-			self.coregraphImageView.image = self.coregraphImage;
-			self.coregraphImageView.hidden = NO;
+			if ([self shouldShow]) {
+				self.coregraphImageView.image = self.coregraphImage;
+				self.coregraphImageView.hidden = NO;
+			}
 			
 			if (self.coregraphImage) {
-				self.coregraphTime.text = [NSString stringWithFormat:@"%u ms", ctime / TIMES_TO_REPEAT];
+				self.coregraphTime.text = [NSString stringWithFormat:@"%u ms", ctime / [self timesToRepeat]];
 				self.coregraphTime.hidden = NO;
 			}
 		});
 		
 		uint32_t atime = 0;
 		MEASURE_CALL_TIME_ADD(atime, ^{
-			for (int i=0; i<TIMES_TO_REPEAT; i++, counter++) {
+			for (int i=0; i<[self timesToRepeat]; i++, counter++) {
 				self.accelerateImage = [self prepareAndGenerateAccelerateImage];
 				[self updateCounter:counter];
 			}
 		});
 
 		dispatch_async(dispatch_get_main_queue(), ^{
-			self.accelerateImageView.image = self.accelerateImage;
-			self.accelerateImageView.hidden = NO;
+			if ([self shouldShow]) {
+				self.accelerateImageView.image = self.accelerateImage;
+				self.accelerateImageView.hidden = NO;
+			}
 			
 			if (self.accelerateImage) {
-				self.accelerateTime.text = [NSString stringWithFormat:@"%u ms", atime / TIMES_TO_REPEAT];
+				self.accelerateTime.text = [NSString stringWithFormat:@"%u ms", atime / [self timesToRepeat]];
 				self.accelerateTime.hidden = NO;
 			}
 		});
@@ -246,12 +333,17 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 			
 			self.menuToolbar.alpha = 1.f;
 			self.menuToolbar.userInteractionEnabled = YES;
+			[self updateToolbarMenu];
 		});
 	});
 }
 
 - (UIImage *)sourceImage
 {
+	if ([self shouldShow] == NO) {
+		return _orig1200;
+	}
+	
 	const BOOL isScale = (_action == kImageActionScale);
 	return isScale ? _orig200 : _orig120;
 }
@@ -388,7 +480,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	const CGSize size = self.coregraphImageView.bounds.size;
 	CGContextRef context = UIGraphicsGetCurrentContext();
 
-	CGContextRotateCTM(context, (float)(M_PI * .5f));
+	CGContextRotateCTM(context, (CGFloat)(M_PI * .5f));
 	CGContextTranslateCTM(context, 0, -size.height);
 	[[self sourceImage] drawInRect:((CGRect) {CGPointZero, size})];
 }
@@ -428,7 +520,7 @@ typedef NS_ENUM(NSUInteger, kImageAction) {
 	const CGSize size = self.coregraphImageView.bounds.size;
 //	CGContextRef context = UIGraphicsGetCurrentContext();
 	
-	UIImage *blurredImage = [[self sourceImage] stackBlur:3];
+	UIImage *blurredImage = [[self sourceImage] stackBlur:2];
 	[blurredImage drawInRect:((CGRect) {CGPointZero, size})];
 }
 

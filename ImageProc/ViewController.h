@@ -17,6 +17,9 @@
 @property(nonatomic, retain) IBOutlet UILabel *accelerateTime;
 @property(nonatomic, retain) IBOutlet UIToolbar *menuToolbar;
 @property(nonatomic, retain) IBOutlet UIBarButtonItem *counterBarItem;
+@property(nonatomic, retain) IBOutlet UIBarButtonItem *switcherBarItem;
+
+- (IBAction)onSwitcher:(UISwitch *)sender;
 
 - (void)doScale;
 - (void)doRotate;
